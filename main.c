@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h> 
 #include "command.h"
 
 int main(){
@@ -9,22 +11,37 @@ int main(){
     while(1){
         printf("mysh> ");
         if(fgets(input, sizeof(input), stdin) == NULL){
-            break; // EOF or error
-        }
-        if(strcmp(input, "exit\n") == 0){
-            break; // EOF or error
+            break;                                                       // EOF or error
         }
 
-        input[strcspn(input, "\n")] = 0; // Remove newline
+        input[strcspn(input, "\n")] = 0;                                // Remove newline
 
         if (strlen(input) == 0) {
-            continue; // Skip empty input
+            continue;                                                   // Skip empty input
         }
-        //Command cmd = parse_input(input);
+        
+        Command cmd = parse_input(input);
 
-        //if (strcmp(cmd.args[0], "exit") == 0) {
-            //break; // Exit the shell
-        //}
+        if (strcmp(cmd.args[0], "exit") == 0) {
+            break;                            
+        }
+    pid_t pid = fork();                                                 // External Command Execution
+
+    if (pid == 0) {
+        // Child
+        if (execvp(cmd.args[0], cmd.args) == -1) {                       // execvp takes the command name and the entire args array
+            fprintf(stderr, "mysh: command not found: %s\n", cmd.args[0]);
+        }
+        exit(EXIT_FAILURE);                                              // Exit child if execvp fails
+    } 
+    else if (pid < 0) {
+        perror("mysh fork error");                                      // Failed Fork 
+    } 
+    else {
+        // Parent
+        int status;
+        waitpid(pid, &status, 0);                                       // Wait for the child to finish
+    }
     }
     return 0; 
 }

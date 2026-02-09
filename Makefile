@@ -9,8 +9,8 @@ TARGET = mysh
 all: $(TARGET)
 
 # Build rule for the shell executable 
-$(TARGET): main.c 
-	$(CC) $(CFLAGS) main.c -o $(TARGET) 
+$(TARGET): main.c parser.c
+	$(CC) $(CFLAGS) main.c parser.c -o $(TARGET) 
 
 # Removes generated files  
 clean:
