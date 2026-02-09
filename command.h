@@ -12,10 +12,10 @@ typedef struct {
     bool background;        // true if & is present
 } Command;
 
-void parse_command(char *input, Command *cmd);      //parses user input into command structure
+//void parse_command(char *input, Command *cmd);      //parses user input into command structure
 
-void execute_command(Command *cmd);                 //executes the command based on the command structure
+//void execute_command(Command *cmd);                 //executes the command based on the command structure
 
-void check_background_jobs();                       //here to solve the zombie problem
-
+//void check_background_jobs();                       //here to solve the zombie problem
+//Command parse_input(char *input);                 //parses user input into command structure
 #endif
