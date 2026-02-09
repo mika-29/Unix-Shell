@@ -14,13 +14,20 @@ int main(){
             break;                                                       // EOF or error
         }
 
-        input[strcspn(input, "\n")] = 0;                                // Remove newline
+        input[strcspn(input, "\n")] = 0;                              // Remove newline
+        
+        while (input[0] == ' ' || input[0] == '\t') {
+            memmove(input, input + 1, strlen(input) + 1);                     // Trim leading whitespace
+        }
 
         if (strlen(input) == 0) {
             continue;                                                   // Skip empty input
         }
         
         Command cmd = parse_input(input);
+        if (cmd.command == NULL) {
+            continue;                                                   // No command entered
+        }
 
         if (strcmp(cmd.command, "exit") == 0) {
             break;                            
@@ -46,7 +53,7 @@ int main(){
             }
             continue;                                                   // Handle built-in 'pwd' and skip to next loop
         }
-        
+
     pid_t pid = fork();                                                 // External Command Execution
 
     if (pid == 0) {
