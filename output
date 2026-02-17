@@ -1,0 +1,11 @@
+.:
+Makefile
+README.md
+command.c
+command.h
+executor.c
+main.c
+mysh
+output
+parser.c
+test.txt

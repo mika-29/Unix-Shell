@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h> 
+#include <fcntl.h>
 #include "command.h"
 
 Status execute_command(Command *cmd) {
+    static int global_job_id = 1;
     if (cmd->command == NULL) {
         return STATUS_EMPTY;                                                   // No command entered
     }
@@ -40,22 +42,59 @@ Status execute_command(Command *cmd) {
     pid_t pid = fork();                                            // External Command Execution
 
     if (pid == 0) {
-        // Child
+
+        if (cmd->input_file != NULL) {
+            int fd_in = open(cmd->input_file, O_RDONLY);
+            if (fd_in < 0) {
+                perror("open input file error");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fd_in, STDIN_FILENO);
+            close(fd_in);
+        }
+
+        if (cmd->output_file != NULL) {
+            int flags = O_WRONLY | O_CREAT;
+            if (cmd->append) {
+                flags |= O_APPEND; 
+            } else {
+                flags |= O_TRUNC; 
+            }
+            int fd_out = open(cmd->output_file, flags, 0644);
+            if (fd_out < 0){
+                perror("open output file error");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fd_out, STDOUT_FILENO);
+            close(fd_out);
+        }
+            
         if (execvp(cmd->args[0], cmd->args) == -1) {                       // execvp takes the command name and the entire args array
             fprintf(stderr, "mysh: command not found: %s\n", cmd->args[0]);
-        }
-        exit(EXIT_FAILURE);                                              // Exit child if execvp fails
+            perror("exec failed");
+            exit(EXIT_FAILURE);                                              // Exit child if execvp fails
+        }                                        // Exit child if execvp fails
     } 
 
     else if (pid < 0) {
-        perror("mysh fork error");    
+        perror("mysh: fork error");    
         return STATUS_ERROR;                                           // Failed Fork 
     } 
 
     else {
-        // Parent
-        int status;
-        waitpid(pid, &status, 0);                                       // Wait for the child to finish
+        // Parent process
+        if (!cmd->background) {
+            int status;
+            waitpid(pid, &status, 0);   
+            if (WIFEXITED(status)){
+                int exit_code = WEXITSTATUS(status);
+                if (exit_code != 0){
+                    printf("mysh: command exited with code %d\n", exit_code);
+                }
+            }                                    
+        } else {
+            printf("[%d] Started: %s (PID: %d)\n", global_job_id++, cmd->command, pid);
+        }
     }
 
     return STATUS_OK;

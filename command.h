@@ -22,6 +22,6 @@ typedef enum {
 
 
 Command parse_input(char *input);                   //parses user input into command structure
-int execute_command(Command *cmd);                  //executes the parsed command 
+Status execute_command(Command *cmd);                  //executes the parsed command 
 
 #endif
