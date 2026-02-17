@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
+#include <sys/wait.h>
 #include "command.h"
 
 void free_command_content(Command *cmd);
@@ -9,6 +10,13 @@ int main(){
     char input[1024];
 
     while(1){
+
+        int status;
+        pid_t pid;
+        while ((pid = waitpid(-1, &status, WNOHANG)) > 0){
+            printf("Background process %d finished with status %d\n", pid, WEXITSTATUS(status));
+        }                                                                // Reap any finished background processes
+        
         printf("mysh> ");
         if(fgets(input, sizeof(input), stdin) == NULL){
             break;                                                       // EOF or error

@@ -93,7 +93,16 @@ Status execute_command(Command *cmd) {
                 }
             }                                    
         } else {
-            printf("[%d] Started: %s (PID: %d)\n", global_job_id++, cmd->command, pid);
+            // Start the line
+            printf("[%d] Started: ", global_job_id++); 
+        
+        // Print all arguments on the SAME line
+            for (int j = 0; cmd->args[j] != NULL; j++) {
+                printf("%s ", cmd->args[j]);
+            }
+        
+        // Finalize the line with PID and the crucial newline
+            printf("(PID: %d)\n", pid);
         }
     }
 
