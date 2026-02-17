@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> 
 #include "command.h"
+
+void free_command_content(Command *cmd);
 
 int main(){
     char input[1024];
@@ -23,10 +26,31 @@ int main(){
         
         Command cmd = parse_input(input);
         
-        if (execute_command(&cmd)) {
-            break;                                                      // Exit if 'exit' command is executed
+        Status result = execute_command(&cmd);
+
+        if (result == STATUS_EXIT) {
+            free_command_content(&cmd);
+            printf("Exiting mysh...\n");
+            break;                                                       // Exit the shell loop
         }
+
+        free_command_content(&cmd); 
     }
 
     return 0;
+}
+
+void free_command_content(Command *cmd) {
+    for (int j = 0; cmd->args[j] != NULL; j++) {
+        free(cmd->args[j]);
+        cmd->args[j] = NULL; 
+    }
+    if (cmd->input_file) {
+        free(cmd->input_file);
+        cmd->input_file = NULL;
+    }
+    if (cmd->output_file) {
+        free(cmd->output_file);
+        cmd->output_file = NULL;
+    }
 }

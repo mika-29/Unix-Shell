@@ -5,13 +5,13 @@
 #include <sys/wait.h> 
 #include "command.h"
 
-int execute_command(Command *cmd) {
+Status execute_command(Command *cmd) {
     if (cmd->command == NULL) {
-        return 0;                                                   // No command entered
+        return STATUS_EMPTY;                                                   // No command entered
     }
 
     if (strcmp(cmd->command, "exit") == 0) {
-            return 1;                           
+            return STATUS_EXIT;                           
         }
 
     if (strcmp(cmd->command, "cd") == 0) {
@@ -20,9 +20,10 @@ int execute_command(Command *cmd) {
         } else {
             if (chdir(cmd->args[1]) != 0) {
                 perror("mysh");
+                return STATUS_ERROR;                                               // Handle 'cd' error
             }
         }
-        return 0;                                                   // Handle built-in 'cd' and skip to next loop
+        return STATUS_OK;                                                   // Handle built-in 'cd' and skip to next loop
     }
 
     if(strcmp(cmd->command, "pwd") == 0){
@@ -31,8 +32,9 @@ int execute_command(Command *cmd) {
             printf("%s\n", cwd);
         } else {
             perror("mysh");
+            return STATUS_ERROR;                                               // Handle 'pwd' error
         }
-        return 0;                                                   // Handle built-in 'pwd' and skip to next loop
+        return STATUS_OK;                                                   // Handle built-in 'pwd' and skip to next loop
     }
 
     pid_t pid = fork();                                            // External Command Execution
@@ -46,7 +48,8 @@ int execute_command(Command *cmd) {
     } 
 
     else if (pid < 0) {
-        perror("mysh fork error");                                      // Failed Fork 
+        perror("mysh fork error");    
+        return STATUS_ERROR;                                           // Failed Fork 
     } 
 
     else {
@@ -55,5 +58,5 @@ int execute_command(Command *cmd) {
         waitpid(pid, &status, 0);                                       // Wait for the child to finish
     }
 
-    return 0;
+    return STATUS_OK;
 }

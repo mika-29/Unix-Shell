@@ -12,6 +12,14 @@ typedef struct {
     bool background;        // true if & is present
 } Command;
 
+typedef enum {
+    STATUS_OK,      // Command executed successfully
+    STATUS_EXIT,    // User requested to exit the shell
+    STATUS_ERROR,   // An error occurred (optional)
+    STATUS_EMPTY    // No command was entered
+} Status; 
+
+
 
 Command parse_input(char *input);                   //parses user input into command structure
 int execute_command(Command *cmd);                  //executes the parsed command 
