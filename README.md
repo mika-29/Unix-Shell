@@ -1,42 +1,60 @@
-# UNIX SHELL
+# UNIX SHELL - CMSC 125 [Lab 1]
 
-## Problem Analysis 
-The goal of this laboratory is to implement a UNIX SHELL using POSIX API. The shell must interpret user commands, 
-execute programs, and manage processes while remaining interactive. 
+## Group Members
+Borces, Michaela F.
+Tambolero, Marinelle Joan U.
 
-**Key challenges include:** 
+## Compilation and Usage Instructions
 
-**Process Management:** External commands must be executed using the fork-exec model so the shell continues running after each command. 
+**To compile:** From inside the project directory, compile with: gcc -Wall -Wextra -o mysh *.c
 
-**Process Synchronization:** The shell must support both foreground execution, where it waits for the process to finish, and background execution using the & operator, while preventing zombie processes.
+**To run the shell:** Run with: ./mysh
 
-**Input/Output Redirection:** The shell must support <, >, >> by redirecting standard input and output using file descriptors.
+**List of implemented features:** 
+- Built-in commands:
+      - cd
+      - pwd
+      - exit
+      - jobs
+- Input redirection: <
+- Output redirection: > and >>
+- Bakground execution: &
+- Background jobs that exit immediately
+- Array of background jobs with PIDS
+- Reaping of finished background jobs
+- Multiple concurrent background jobs
+- Shell remains responsive while background jobs are still running
+- Exterminate background jobs when exiting
 
-**Command Parsing:** The shell must distinguish between built-in and external commands and must know how to handle invalid input. 
+**Known limitations and bugs:** 
+- The shell doesn't fully support quoted strings with spaces (e.g., echo "hello world"). Quotation marks are treated as literal characters instead of being removed during parsing.
+- Doesn't properly handle inputs containing spaces.
 
-## Solution Architecture 
-The shell follows a **Read-Evaluate-Print Loop (REPL)** design. 
 
-**>>Initialization**
+**Design decisions and architecture overview:** The shell is organized into the following components:
 
-The shell initializes required data structures and sets up signal handling so interrupts do not terminate the shell itself. 
+- command.h - defines the command structure and holds the function declarations.
+- main.c - Implements the main shell loop, background job tracking, zombie reaping, and cleanup.
+- parser.c - mainly does the parsing of user input into a Command structure, handling arguments, and input redirection.
+- executor.c - Execute commands, handles built-in commands, performs I/O redirection, and manages background execution.
 
-**>>Command Processing** 
+Background jobs are trackes using an array of PIDS.
+Finished background jobs are periodically reaped using waitpid() with WNOHANG.
+On exit, all remaining background jobs are terminated and reaped to prevent orphan processes.
 
-Each command follows this pipeline: 
+**Proof of functionality:**
+- Basic Interaction:
+![basic interaction](image.png)
 
-**Read:** Accept user input using fgets(). 
+- I/O Redirection:
+![I/O 1](image-1.png)
+![I/O 2](image-2.png)
+![I/O 3](image-3.png)
 
-**Parse:** Tokenize the input using strtok() to exctract the command, arguments, redirection operators, and background execution flag. 
+- Background Jobs:
+![bg jobs 1](image-4.png)
+![bg jobs 2](image-5.png)
 
-**Execute:** 
 
-      >Built-in commands are executed directly in the parent process. 
-      
-      >External Commands are executed by forking a child process. The child applies I/O redirection using open() and dup2() before calling execvp().
 
-      >The parent process waits for foreground commands using waitpid(). For background commands, it immediately returns to the prompt and periodically reaps finished processes using waitpid() with WNOHANG.
-      
-**>>Termination** 
-The shell exits on the exit command or EOF, performing cleanup and ensuring all child processes are properly handled. 
 
