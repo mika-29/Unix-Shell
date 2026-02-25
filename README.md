@@ -50,13 +50,14 @@ On exit, all remaining background jobs are terminated and reaped to prevent orph
 
 
 - I/O Redirection:
-![I/O 1](image-1.png)
-![I/O 2](image-2.png)
-![I/O 3](image-3.png)
+![download](https://github.com/user-attachments/assets/2e47f5bb-d9e4-4b94-b8b8-3709bd518f97)
+![download](https://github.com/user-attachments/assets/6e5afdc2-f42d-414b-b611-5318149a6330)
+![download](https://github.com/user-attachments/assets/e826cd0d-f908-41bb-b51b-524ade0ad29f)
+
 
 - Background Jobs:
-![bg jobs 1](image-4.png)
-![bg jobs 2](image-5.png)
+![download](https://github.com/user-attachments/assets/bff56004-0022-4b88-837a-c44ee5fa7b5c)
+![download](https://github.com/user-attachments/assets/bfeba73f-fa91-43f1-ac86-075ed4069d1e)
 
 
 
