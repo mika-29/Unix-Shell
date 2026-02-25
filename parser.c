@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include <string.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
 #include "command.h"
@@ -11,7 +12,7 @@ Command parse_input(char *input) {
     cmd.append = false;
     cmd.background = false;
 
-    char *token = strtok(input, " ");
+    char *token = strtok(input, " \t\n\r");
     int i = 0; 
 
     while (token != NULL && i < 255){
@@ -22,7 +23,7 @@ Command parse_input(char *input) {
         }
 
         if (strcmp(token, ">") == 0) {        // Input redirection
-            token = strtok(NULL, " \t");
+            token = strtok(NULL, " \t\n\r");
             if (token) cmd.output_file = strdup(token);
             cmd.append = false;
         } 
@@ -32,7 +33,7 @@ Command parse_input(char *input) {
             cmd.append = true;
         } 
         else if (strcmp(token, "<") == 0) {
-            token = strtok(NULL, " \t");
+            token = strtok(NULL, " \t\n\r");
             if (token) cmd.input_file = strdup(token);
         } 
         else if (strcmp(token, "&") == 0) {
