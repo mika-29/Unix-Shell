@@ -2,15 +2,13 @@
 #include <string.h>
 #include <stdlib.h> 
 #include <sys/wait.h>
+#include <signal.h>
 #include "command.h"
 
 #define MAX_BG 100 
 
 pid_t bg_pids[MAX_BG];
 int bg_count = 0;
-
-void cleanup_background_processes();
-void free_command_content(Command *cmd);
 
 int main(){
     char input[1024];
@@ -38,6 +36,7 @@ int main(){
         Status result = execute_command(&cmd);
 
         if (result == STATUS_EXIT) {
+            cleanup_on_exit();                                                   // Clean up background processes before exiting
             free_command_content(&cmd);
             printf("Exiting mysh...\n");
             break;                                                       // Exit the shell loop
@@ -49,7 +48,7 @@ int main(){
     return 0;
 }
 
-void cleanup_background_processes() {
+void cleanup_background_processes(void) {
     int status;
 
     for (int i = 0; i < bg_count; i++) {
@@ -67,6 +66,20 @@ void cleanup_background_processes() {
             i--;  
         }
     }
+}
+
+void cleanup_on_exit(void) {
+    int status;
+
+    for (int i = 0; i < bg_count; i++) {
+        kill(bg_pids[i], SIGTERM);
+    }
+    
+    for (int i = 0; i < bg_count; i++) {
+        waitpid(bg_pids[i], &status, 0);
+    }
+
+    bg_count = 0;
 }
 
 void free_command_content(Command *cmd) {

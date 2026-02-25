@@ -1,5 +1,5 @@
-#ifndef EXECUTOR_H           
-#define EXECUTOR_H          
+#ifndef COMMAND_H           
+#define COMMAND_H          
 
 #include <stdbool.h>        
 
@@ -24,4 +24,7 @@ typedef enum {
 Command parse_input(char *input);                   //parses user input into command structure
 Status execute_command(Command *cmd);                  //executes the parsed command 
 
+void cleanup_background_processes(void);
+void cleanup_on_exit(void);
+void free_command_content(Command *cmd);
 #endif
