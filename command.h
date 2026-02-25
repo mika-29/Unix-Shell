@@ -13,10 +13,10 @@ typedef struct {
 } Command;
 
 typedef enum {
-    STATUS_OK,      // Command executed successfully
-    STATUS_EXIT,    // User requested to exit the shell
-    STATUS_ERROR,   // An error occurred (optional)
-    STATUS_EMPTY    // No command was entered
+    STATUS_OK,             // Command executed successfully
+    STATUS_EXIT,           // User requested to exit the shell
+    STATUS_ERROR,          // An error occurred 
+    STATUS_EMPTY           // No command was entered
 } Status; 
 
 

@@ -6,6 +6,11 @@
 #include <fcntl.h>
 #include "command.h"
 
+#define MAX_BG 100 
+
+extern pid_t bg_pids[];
+extern int bg_count; 
+
 Status execute_command(Command *cmd) {
     static int global_job_id = 1;
     if (cmd->command == NULL) {
@@ -36,10 +41,22 @@ Status execute_command(Command *cmd) {
             perror("mysh");
             return STATUS_ERROR;                                               // Handle 'pwd' error
         }
-        return STATUS_OK;                                                   // Handle built-in 'pwd' and skip to next loop
+        return STATUS_OK;                                                      // Handle built-in 'pwd' and skip to next loop
     }
 
-    pid_t pid = fork();                                            // External Command Execution
+    if (strcmp(cmd->command, "jobs") == 0) {
+    if (bg_count == 0) {
+        printf("No active background jobs.\n");
+    } else {
+        printf("Active background jobs:\n");
+        for (int i = 0; i < bg_count; i++) {
+            printf("[%d] PID: %d\n", i + 1, bg_pids[i]);
+        }
+    }
+    return STATUS_OK;
+    }
+
+    pid_t pid = fork();                                                        // External Command Execution
 
     if (pid == 0) {
 
@@ -69,16 +86,16 @@ Status execute_command(Command *cmd) {
             close(fd_out);
         }
             
-        if (execvp(cmd->args[0], cmd->args) == -1) {                       // execvp takes the command name and the entire args array
+        if (execvp(cmd->args[0], cmd->args) == -1) {                           // execvp takes the command name and the entire args array
             fprintf(stderr, "mysh: command not found: %s\n", cmd->args[0]);
             perror("exec failed");
-            exit(EXIT_FAILURE);                                              // Exit child if execvp fails
-        }                                        // Exit child if execvp fails
+            exit(EXIT_FAILURE);                                                // Exit child if execvp fails
+        }                                                                      // Exit child if execvp fails
     } 
 
     else if (pid < 0) {
         perror("mysh: fork error");    
-        return STATUS_ERROR;                                           // Failed Fork 
+        return STATUS_ERROR;                                                   // Failed Fork 
     } 
 
     else {
@@ -93,15 +110,17 @@ Status execute_command(Command *cmd) {
                 }
             }                                    
         } else {
-            // Start the line
+            if(bg_count < MAX_BG){
+                bg_pids[bg_count++] = pid; 
+            } else {
+                fprintf(stderr, "mysh: too many background jobs\n");
+            }
             printf("[%d] Started: ", global_job_id++); 
         
-        // Print all arguments on the SAME line
             for (int j = 0; cmd->args[j] != NULL; j++) {
                 printf("%s ", cmd->args[j]);
             }
         
-        // Finalize the line with PID and the crucial newline
             printf("(PID: %d)\n", pid);
         }
     }

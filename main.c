@@ -4,6 +4,12 @@
 #include <sys/wait.h>
 #include "command.h"
 
+#define MAX_BG 100 
+
+pid_t bg_pids[MAX_BG];
+int bg_count = 0;
+
+void cleanup_background_processes();
 void free_command_content(Command *cmd);
 
 int main(){
@@ -11,11 +17,7 @@ int main(){
 
     while(1){
 
-        int status;
-        pid_t pid;
-        while ((pid = waitpid(-1, &status, WNOHANG)) > 0){
-            printf("Background process %d finished with status %d\n", pid, WEXITSTATUS(status));
-        }                                                                // Reap any finished background processes
+        cleanup_background_processes();                                  // Reap any finished background processes
         
         printf("mysh> ");
         if(fgets(input, sizeof(input), stdin) == NULL){
@@ -33,7 +35,6 @@ int main(){
         }
         
         Command cmd = parse_input(input);
-        
         Status result = execute_command(&cmd);
 
         if (result == STATUS_EXIT) {
@@ -46,6 +47,26 @@ int main(){
     }
 
     return 0;
+}
+
+void cleanup_background_processes() {
+    int status;
+
+    for (int i = 0; i < bg_count; i++) {
+        pid_t result = waitpid(bg_pids[i], &status, WNOHANG);
+
+        if (result > 0) {
+            if (WIFEXITED(status)) {
+                printf("Background process %d finished with exit code %d\n",
+                       bg_pids[i], WEXITSTATUS(status));
+            }
+            for (int j = i; j < bg_count - 1; j++) {
+                bg_pids[j] = bg_pids[j + 1];
+            }
+            bg_count--;
+            i--;  
+        }
+    }
 }
 
 void free_command_content(Command *cmd) {
