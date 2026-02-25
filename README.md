@@ -36,15 +36,18 @@ Tambolero, Marinelle Joan U.
 - command.h - defines the command structure and holds the function declarations.
 - main.c - Implements the main shell loop, background job tracking, zombie reaping, and cleanup.
 - parser.c - mainly does the parsing of user input into a Command structure, handling arguments, and input redirection.
-- executor.c - Execute commands, handles built-in commands, performs I/O redirection, and manages background execution.
+- executor.c - Execute commands, handle built-in commands, perform I/O redirection, and manage background execution.
 
-Background jobs are trackes using an array of PIDS.
+Background jobs are tracked using an array of PIDS.
+
 Finished background jobs are periodically reaped using waitpid() with WNOHANG.
+
 On exit, all remaining background jobs are terminated and reaped to prevent orphan processes.
 
 **Proof of functionality:**
 - Basic Interaction:
-![basic interaction](image.png)
+![download](https://github.com/user-attachments/assets/81132c9b-de08-4f5d-8720-3d261cea0f01)
+
 
 - I/O Redirection:
 ![I/O 1](image-1.png)
@@ -54,6 +57,7 @@ On exit, all remaining background jobs are terminated and reaped to prevent orph
 - Background Jobs:
 ![bg jobs 1](image-4.png)
 ![bg jobs 2](image-5.png)
+
 
 
 
